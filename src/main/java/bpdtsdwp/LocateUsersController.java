@@ -9,28 +9,69 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @RestController
 public class LocateUsersController {
-    @Value("${bpdtsTestApp.baseUrl}")
-    private String baseUrl;
+    private static final double METRES_IN_A_MILE = 1609.34;
 
-    @GetMapping("/test")
-    public List<UserDetails> test() {
-        WebClient webClient = WebClient.create(baseUrl);
+    private final WebClient client;
+    private final String targetCity;
+    private final double targetLatitude;
+    private final double targetLongitude;
+    private final double withinMetres;
 
-        ResponseEntity<List<User>> response = webClient.get()
+    public LocateUsersController(WebClient client,
+                                 @Value("${city.name}") String targetCity,
+                                 @Value("${city.latitude}") double targetLatitude,
+                                 @Value("${city.longitude}") double targetLongitude,
+                                 @Value("${city.withinMiles}") double withinMiles) {
+        this.client = client;
+        this.targetCity = targetCity;
+        this.targetLatitude = targetLatitude;
+        this.targetLongitude = targetLongitude;
+        this.withinMetres = withinMiles * METRES_IN_A_MILE;
+    }
+
+    @GetMapping("/users/inOrNearLondon")
+    public List<UserDetails> usersInOrNearCity() {
+        Stream<User> usersInLondon = usersInTargetCity();
+        Stream<User> usersWithDistanceOfLondon = usersWithinDistanceOfTargetCity();
+
+        return Stream.concat(usersInLondon, usersWithDistanceOfLondon)
+                .map(user -> new UserDetails(user.id(), user.firstName(), user.lastName()))
+                .distinct()
+                .toList();
+    }
+
+    private Stream<User> usersInTargetCity() {
+        ResponseEntity<List<User>> response = client.get()
+                .uri("/city/{city}/users", targetCity)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<User>>() {})
+                .share()
+                .block();
+
+        List<User> usersInTargetCity = Objects.requireNonNull(response).getBody();
+        return Objects.requireNonNull(usersInTargetCity).stream();
+    }
+
+    private Stream<User> usersWithinDistanceOfTargetCity() {
+        ResponseEntity<List<User>> response = client.get()
                 .uri("/users")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<User>>() {})
                 .share()
                 .block();
 
-        Objects.requireNonNull(response);
-        Objects.requireNonNull(response.getBody());
+        List<User> allUsers = Objects.requireNonNull(response).getBody();
 
-        return response.getBody().stream()
-                .map(user -> new UserDetails(user.firstName(), user.lastName()))
-                .toList();
+        return Objects.requireNonNull(allUsers).stream()
+                .filter(this::withinDistanceOfTargetCity);
     }
+
+    private boolean withinDistanceOfTargetCity(User user) {
+        return Haversine.distance(targetLatitude, targetLongitude, user.latitude(), user.longitude()) <= withinMetres;
+    }
+
 }
