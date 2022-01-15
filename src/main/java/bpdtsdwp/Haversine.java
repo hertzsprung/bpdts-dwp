@@ -4,7 +4,7 @@ package bpdtsdwp;
 class Haversine {
     private static final double EARTH_RADIUS_METRES = 6.371e6;
 
-    static double distance(double startLat, double startLong, double endLat, double endLong) {
+    static double distanceInMetres(double startLat, double startLong, double endLat, double endLong) {
         double dLat  = Math.toRadians((endLat - startLat));
         double dLong = Math.toRadians((endLong - startLong));
 

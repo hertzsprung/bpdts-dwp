@@ -1,4 +1,4 @@
-package bpdtsdwp;
+package bpdtsdwp.cucumber;
 
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectClasspathResource;
