@@ -1,0 +1,47 @@
+plugins {
+    id 'application'
+}
+
+group = 'bpdts-dwp'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+ext {
+    cucumberVersion = '7.2.3'
+    junitVersion = '5.8.1'
+    junitPlatformVersion = '1.8.1'
+}
+
+dependencies {
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberVersion}"
+    testImplementation "org.junit.platform:junit-platform-suite:${junitPlatformVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+}
+
+tasks.register('cucumber', JavaExec) {
+    dependsOn assemble, testClasses
+    main = "io.cucumber.core.cli.Main"
+    classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+    args = ['--plugin', 'pretty', '--glue', 'bpdtsdwp', 'src/test/resources']
+    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+}
+
+repositories {
+    mavenCentral()
+}
