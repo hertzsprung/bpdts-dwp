@@ -43,7 +43,6 @@ tasks.register('cucumber', JavaExec) {
     dependsOn assemble, testClasses
     main = "io.cucumber.core.cli.Main"
     classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-    args = ['--plugin', 'pretty', '--glue', 'bpdtsdwp', 'src/test/resources']
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
