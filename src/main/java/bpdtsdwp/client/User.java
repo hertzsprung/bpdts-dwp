@@ -1,8 +1,8 @@
-package bpdtsdwp;
+package bpdtsdwp.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-record User(
+public record User(
         long id,
         @JsonProperty("first_name") String firstName,
         @JsonProperty("last_name") String lastName,

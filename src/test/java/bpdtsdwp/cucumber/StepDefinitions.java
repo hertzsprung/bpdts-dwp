@@ -1,6 +1,6 @@
 package bpdtsdwp.cucumber;
 
-import bpdtsdwp.UserDetails;
+import bpdtsdwp.service.UserDetails;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

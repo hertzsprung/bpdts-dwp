@@ -1,4 +1,4 @@
-package bpdtsdwp;
+package bpdtsdwp.client;
 
 // adapted from https://github.com/jasonwinn/haversine/
 class Haversine {

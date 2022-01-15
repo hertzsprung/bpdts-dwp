@@ -41,9 +41,17 @@ dependencies {
 
 tasks.register('cucumber', JavaExec) {
     dependsOn assemble, testClasses
-    main = "io.cucumber.core.cli.Main"
+    mainClass = 'io.cucumber.core.cli.Main'
     classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+}
+
+tasks.named('build') {
+    dependsOn cucumber
+}
+
+tasks.named('cucumber') {
+    shouldRunAfter test
 }
 
 repositories {
